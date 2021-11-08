@@ -49,7 +49,11 @@ const NewPlace = () => {
           description: values.description,
           creator: auth.userId,
         }),
-        headers: { "Content-Type": "application/json" },
+        headers : {
+          'Content-Type' : 'application/json',
+          'Accept' : 'application/json',
+          'Authorization' : 'Bearer ' + auth.token
+        }
       })
         .then(function (response) {
           //handle success

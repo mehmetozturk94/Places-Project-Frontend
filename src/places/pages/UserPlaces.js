@@ -1,50 +1,50 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import PlaceList from '../components/PlaceList';
-import ErrorModal from '../../shared/components/UIElements/ErrorModal';
-import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
-import { useHttpClient } from '../../shared/hooks/http-hook';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useHttpClient } from "../../shared/hooks/http-hook";
+import ImageList from "@mui/material/ImageList";
+import ImageListItem from "@mui/material/ImageListItem";
+import ImageListItemBar from "@mui/material/ImageListItemBar";
+import Container from "@mui/material/Container";
 
 const UserPlaces = () => {
-  const [loadedPlaces, setLoadedPlaces] = useState();
-  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const [loadedPlaces, setLoadedPlaces] = useState([]);
+  const { sendRequest } = useHttpClient();
 
   const userId = useParams().userId;
 
   useEffect(() => {
-      axios({
-      method: "get",
-      url: `http://localhost:3000/api/places/user/${userId}`,
-      headers: { "Content-Type": "application/json" },
-    })
-      .then(function (response) {
-        //handle success
-        setLoadedPlaces(response.places);
-      })
-      .catch(function (response) {
-        //handle error
-        alert(response)
-      });
-  }, [userId]);
-
-  const placeDeletedHandler = deletedPlaceId => {
-    setLoadedPlaces(prevPlaces =>
-      prevPlaces.filter(place => place.id !== deletedPlaceId)
-    );
-  };
+    const fetchPlaces = async () => {
+      try {
+        const responseData = await sendRequest(
+          `http://localhost:3000/api/places/user/${userId}`
+        );
+        setLoadedPlaces(responseData.places);
+      } catch (err) {}
+    };
+    fetchPlaces();
+  }, [sendRequest, userId]);
 
   return (
     <React.Fragment>
-      <ErrorModal error={error} onClear={clearError} />
-      {isLoading && (
-        <div className="center">
-          <LoadingSpinner />
-        </div>
-      )}
-      {!isLoading && loadedPlaces && (
-        <PlaceList items={loadedPlaces} onDeletePlace={placeDeletedHandler} />
-      )}
+      <Container component="center">
+        <ImageList sx={{ width: 700, height: 650 }}>
+          {loadedPlaces.map((item) => (
+            <ImageListItem key={item.title}>
+              <img
+                src={`${item.image}?w=248&fit=crop&auto=format`}
+                srcSet={`${item.image}?w=248&fit=crop&auto=format&dpr=2 2x`}
+                alt={item.title}
+                loading="lazy"
+              />
+              <ImageListItemBar
+                title={item.title}
+                subtitle={<span>{item.description}</span>}
+                position="below"
+              />
+            </ImageListItem>
+          ))}
+        </ImageList>
+      </Container>
     </React.Fragment>
   );
 };

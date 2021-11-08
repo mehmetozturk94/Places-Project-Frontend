@@ -50,8 +50,8 @@ export default function Signin() {
         .then(function (response) {
           //handle success
           alert(`Login Successfully`);
-          auth.login(response.data.user.id);
-          console.log(JSON.stringify(response.data.user.id));
+          auth.login(response.data.userId, response.data.token);
+          console.log(JSON.stringify(response.data.userId));
         })
         .catch(function (response) {
           //handle error

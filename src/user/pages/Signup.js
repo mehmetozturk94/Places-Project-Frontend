@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import * as yup from "yup";
 import { useFormik } from "formik";
@@ -15,6 +15,8 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import { useHistory } from "react-router-dom";
+import { AuthContext } from "../../shared/context/auth-context";
 
 const validationSchema = yup.object({
   firstName: yup
@@ -35,6 +37,8 @@ const theme = createTheme();
 export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const history = useHistory();
+  const auth = useContext(AuthContext)
 
   const formik = useFormik({
     initialValues: {
@@ -57,16 +61,15 @@ export default function Signup() {
         }),
         headers: { "Content-Type": "application/json" },
       })
-        .then(function (response) {
-          //handle success
+        .then(function (response) {   
+          auth.login(response.data.userId);  
           alert("Successfully Registered");
-          setIsLoading(false);
+          history.push('/auth')     
         })
         .catch(function (response) {
-          //handle error
-          alert("Not Registered");
-          setError("Something Went Wrong, Please Try Again");
-          setIsLoading(false);
+          auth.login(response.data.userId, response.data.token);  
+          alert("Successfully Registered");
+          history.push('/auth') 
         });
     },
   });
